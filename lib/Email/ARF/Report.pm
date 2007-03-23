@@ -15,28 +15,39 @@ Email::ARF::Report - interpret Abuse Reporting Format (ARF) messages
 
 =head1 VERSION
 
-version 0.002
+version 0.003
 
-  $Id: /my/pep/Email-ARF/trunk/lib/Email/ARF/Report.pm 31083 2007-03-22T19:13:24.769614Z rjbs  $
+  $Id: /my/pep/Email-ARF/trunk/lib/Email/ARF/Report.pm 31179 2007-03-23T02:07:17.416360Z rjbs  $
 
-B<Achtung!>  Yes, version 0.002.  This is a prototype.  This module will
+B<Achtung!>  Yes, version 0.003.  This is a prototype.  This module will
 definitely continue to exist, but maybe the interface will change radically
 once more people have seen it and tried to use it.  Don't rely on its interface
 to keep you employed, just yet.
 
 =cut
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 =head1 SYNOPSIS
 
   my $report = Email::ARF::Report->new($text);
 
+  if ($report->field('source-ip') eq $our_ip) {
+    my $sender = $report->original_email->header('from');
+
+    UserManagement->disable_account($sender);
+  }
+
 =head1 DESCRIPTION
+
+ARF, the Abuse Feedback Report Format, is used to report email abuse incidents
+to an email provider.  It includes mechanisms for providing machine-readable
+details about the incident, a human-readable description, and a copy of the
+offending message.
 
 =head1 METHODS
 
-=head2 new
+=head3 new
 
   my $report = Email::ARF::Report->new($message);
 
@@ -79,7 +90,6 @@ sub new {
   my $self = bless {
     mime             => $mime,
     description_part => $description_part,
-    report_part      => $report_part,
     original_part    => $original_part,
   } => $class;
 
@@ -109,6 +119,15 @@ sub _email_from_body {
 
 This method creates a new ARF report from scratch.
 
+The C<original_email> parameter may be given as a string, a string reference,
+or as an object that provides an C<as_string> method.
+
+Default values are provided for the following fields:
+
+  version       - 0.1
+  user-agent    - Email::ARF::Report/$VERSION
+  feedback-type - other
+
 =cut
 
 sub create {
@@ -121,11 +140,17 @@ sub create {
     body       => $arg{description},
   );
 
+  my $original_body = ref $arg{original_email}
+                    ? Scalar::Util::blessed $arg{original_email}
+                      ? $arg{original_email}->as_string
+                      : ${ $arg{original_email} }
+                    : $arg{original_email};
+
   $description_part->header_set('Date');
 
   my $original_part = Email::MIME->create(
     attributes => { content_type => 'message/rfc822' },
-    body       => $arg{original_email}->as_string,
+    body       => $original_body,
   );
 
   $original_part->header_set('Date');
@@ -174,12 +199,24 @@ sub create {
 
 This method returns an Email::MIME object representing the report.
 
-B<Warning!>  Email::MIME objects are mutable.  At present, changing this object
-will B<not> change the rest of the ARF report object.
+Note!  This method returns a B<new> Email::MIME object each time it is called.
+If you just want to get a string representation of the report, call
+C<L</as_string>>.  If you call C<as_email> and make changes to the Email::MIME
+object, the Email::ARF::Report will I<not> be affected.
 
 =cut
 
-sub as_email { $_[0]->{mime} }
+sub as_email {
+  return Email::MIME->new($_[0]->as_string)
+}
+
+=head2 as_string
+
+This method returns a string representation of the report.
+
+=cut
+
+sub as_string { $_[0]->{mime}->as_string }
 
 =head2 original_email
 
@@ -204,10 +241,6 @@ sub _description_part { $_[0]->{description_part} }
 
 sub description {
   $_[0]->_description_part->body;
-}
-
-sub _report_part {
-  $_[0]->{report_part}
 }
 
 sub _fields { $_[0]->{fields} }

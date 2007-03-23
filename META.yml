@@ -10,6 +10,7 @@ no_index:
 requires: 
   Email::MIME: 1.859
   Email::MIME::ContentType: 0
+  Email::MIME::Creator: 1.451
   Params::Util: 0
   Scalar::Util: 0
-version: 0.002
+version: 0.003

@@ -9,13 +9,13 @@ Email::ARF - abuse report format (placeholder module)
 
 =head1 VERSION
 
-version 0.002
+version 0.003
 
-  $Id: /my/pep/Email-ARF/trunk/lib/Email/ARF.pm 31083 2007-03-22T19:13:24.769614Z rjbs  $
+  $Id: /my/pep/Email-ARF/trunk/lib/Email/ARF.pm 31176 2007-03-23T00:56:37.559790Z rjbs  $
 
 =cut
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 warn "This module does nothing." unless $ENV{HARNESS_ACTIVE};
 
