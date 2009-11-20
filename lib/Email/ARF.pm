@@ -7,15 +7,19 @@ package Email::ARF;
 
 Email::ARF - abuse report format (placeholder module)
 
+=head1 REFERENCES
+
+You probably wanted to be looking at L<Email::ARF::Report>.
+
 =head1 VERSION
 
-version 0.003
+version 0.004
 
-  $Id: /my/pep/Email-ARF/trunk/lib/Email/ARF.pm 31176 2007-03-23T00:56:37.559790Z rjbs  $
+  $Id$
 
 =cut
 
-our $VERSION = '0.003';
+our $VERSION = '0.004';
 
 warn "This module does nothing." unless $ENV{HARNESS_ACTIVE};
 
