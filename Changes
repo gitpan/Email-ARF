@@ -1,5 +1,8 @@
 Revision history for Email::ARF::Report
 
+0.006     2011-03-24 23:39:47 America/New_York
+          document means to add extra headers to report
+
 0.005     2009-12-16
           the original message part is now returned as a MIME instead of Simple
           email object

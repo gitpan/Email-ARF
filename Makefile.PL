@@ -1,20 +1,59 @@
+
 use strict;
 use warnings;
 
-use inc::Module::Install;
 
-name          ('Email-ARF');
-author        ('Ricardo SIGNES <rjbs@cpan.org>');
-license       ('perl');
-version_from  ('lib/Email/ARF/Report.pm');
 
-requires('Email::MIME'  => 1.859); # subparts method
-requires('Params::Util' => 0.000); # no minimum; used for _INSTANCE
-requires('Scalar::Util' => 0.000); # unknown minimum; used for blessed
+use ExtUtils::MakeMaker 6.31;
 
-requires('Email::MIME::Creator'     => 1.451); # known bug prior to this
-requires('Email::MIME::ContentType' => 0.000); # no minimum
 
-test_requires('Email::Simple::Creator'	=> 2.100); # required by t/create.t, 2.1 is known as working version
 
-WriteAll();
+my %WriteMakefileArgs = (
+  'ABSTRACT' => 'abuse report format (placeholder module)',
+  'AUTHOR' => 'Ricardo Signes <rjbs@cpan.org>',
+  'BUILD_REQUIRES' => {
+    'Email::Simple::Creator' => '0',
+    'Test::More' => '0.96'
+  },
+  'CONFIGURE_REQUIRES' => {
+    'ExtUtils::MakeMaker' => '6.31'
+  },
+  'DISTNAME' => 'Email-ARF',
+  'EXE_FILES' => [],
+  'LICENSE' => 'perl',
+  'NAME' => 'Email::ARF',
+  'PREREQ_PM' => {
+    'Carp' => '0',
+    'Email::MIME' => '1.900',
+    'Email::MIME::ContentType' => '0',
+    'Email::MIME::Creator' => '0',
+    'Params::Util' => '0',
+    'Scalar::Util' => '0'
+  },
+  'VERSION' => '0.006',
+  'test' => {
+    'TESTS' => 't/*.t'
+  }
+);
+
+
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.56) } ) {
+  my $br = delete $WriteMakefileArgs{BUILD_REQUIRES};
+  my $pp = $WriteMakefileArgs{PREREQ_PM};
+  for my $mod ( keys %$br ) {
+    if ( exists $pp->{$mod} ) {
+      $pp->{$mod} = $br->{$mod} if $br->{$mod} > $pp->{$mod};
+    }
+    else {
+      $pp->{$mod} = $br->{$mod};
+    }
+  }
+}
+
+delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
+  unless eval { ExtUtils::MakeMaker->VERSION(6.52) };
+
+WriteMakefile(%WriteMakefileArgs);
+
+
+

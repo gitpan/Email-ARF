@@ -1,59 +1,17 @@
 use strict;
 use warnings;
-
 package Email::ARF::Report;
+BEGIN {
+  $Email::ARF::Report::VERSION = '0.006';
+}
+# ABSTRACT: interpret Abuse Reporting Format (ARF) messages
 
 use Carp ();
-use Email::MIME 1.859 ();
+use Email::MIME 1.900 (); # ->subtypes
 use Email::MIME::ContentType ();
 use Scalar::Util ();
 use Params::Util qw(_INSTANCE);
 
-=head1 NAME
-
-Email::ARF::Report - interpret Abuse Reporting Format (ARF) messages
-
-=head1 VERSION
-
-version 0.005
-
-B<Achtung!>  Yes, version 0.005.  This is a prototype.  This module will
-definitely continue to exist, but maybe the interface will change radically
-once more people have seen it and tried to use it.  Don't rely on its interface
-to keep you employed, just yet.
-
-=cut
-
-our $VERSION = '0.005';
-
-=head1 SYNOPSIS
-
-  my $report = Email::ARF::Report->new($text);
-
-  if ($report->field('source-ip') eq $our_ip) {
-    my $sender = $report->original_email->header('from');
-
-    UserManagement->disable_account($sender);
-  }
-
-=head1 DESCRIPTION
-
-ARF, the Abuse Feedback Report Format, is used to report email abuse incidents
-to an email provider.  It includes mechanisms for providing machine-readable
-details about the incident, a human-readable description, and a copy of the
-offending message.
-
-=head1 METHODS
-
-=head3 new
-
-  my $report = Email::ARF::Report->new($message);
-
-Given either an Email::MIME object or a string containing the text of an email
-message, this method returns a new Email::ARF::Report object.  If the given
-message source is not a valid report in ARF format, an exception is raised.
-
-=cut
 
 sub new {
   my ($class, $source) = @_;
@@ -99,7 +57,7 @@ sub new {
 
 sub _email_from_body {
   my ($self, $src_email) = @_;
-  
+
   my $src_email_body = $src_email->body;
 
   $src_email_body =~ s/\A(\x0d|\x0a)+//g;
@@ -107,26 +65,6 @@ sub _email_from_body {
   my $email = Email::MIME->new($src_email_body);
 }
 
-=head2 create
-
-  my $mail = Email::ARF::Report->create(
-    original_email => $email,
-    description    => $description,
-    fields         => \%fields,      # or \@fields
-  );
-
-This method creates a new ARF report from scratch.
-
-The C<original_email> parameter may be given as a string, a string reference,
-or as an object that provides an C<as_string> method.
-
-Default values are provided for the following fields:
-
-  version       - 0.1
-  user-agent    - Email::ARF::Report/$VERSION
-  feedback-type - other
-
-=cut
 
 sub create {
   my ($class, %arg) = @_;
@@ -162,7 +100,10 @@ sub create {
   $fields->header_set('Date');
 
   unless (defined $fields->header('user-agent')) {
-    $fields->header_set('User-Agent', "$class/" . $class->VERSION);
+    $fields->header_set(
+      'User-Agent',
+      "$class/" . ($class->VERSION || '(dev)')
+    );
   }
 
   unless (defined $fields->header('version')) {
@@ -186,12 +127,122 @@ sub create {
       # attributes are heeded, here.  The rest are dropped. -- rjbs, 2007-03-21
       content_type  => 'multipart/report; report-type="feedback-report"',
     },
-    header => $arg{header} || [],
     parts  => [ $description_part, $report_part, $original_part ],
+
+    header     => $arg{header}     || [],
+    header_str => $arg{header_str} || [],
   );
 
   $class->new($report);
 }
+
+
+sub as_email {
+  return Email::MIME->new($_[0]->as_string)
+}
+
+
+sub as_string { $_[0]->{mime}->as_string }
+
+
+sub original_email {
+  $_[0]->{original_email}
+}
+
+
+sub _description_part { $_[0]->{description_part} }
+
+sub description {
+  $_[0]->_description_part->body;
+}
+
+sub _fields { $_[0]->{fields} }
+
+
+sub field {
+  my ($self, $field) = @_;
+
+  return $self->_fields->header($field);
+}
+
+
+sub feedback_type { $_[0]->field('Feedback-Type'); }
+sub user_agent    { $_[0]->field('User-Agent');    }
+sub arf_version   { $_[0]->field('Version');       }
+
+
+1;
+
+__END__
+=pod
+
+=head1 NAME
+
+Email::ARF::Report - interpret Abuse Reporting Format (ARF) messages
+
+=head1 VERSION
+
+version 0.006
+
+=head1 WARNING
+
+B<Achtung!>  This is a prototype.  This module will definitely continue to
+exist, but maybe the interface will change radically once more people have seen
+it and tried to use it.  Don't rely on its interface to keep you employed, just
+yet.
+
+=head1 SYNOPSIS
+
+  my $report = Email::ARF::Report->new($text);
+
+  if ($report->field('source-ip') eq $our_ip) {
+    my $sender = $report->original_email->header('from');
+
+    UserManagement->disable_account($sender);
+  }
+
+=head1 DESCRIPTION
+
+ARF, the Abuse Feedback Report Format, is used to report email abuse incidents
+to an email provider.  It includes mechanisms for providing machine-readable
+details about the incident, a human-readable description, and a copy of the
+offending message.
+
+=head1 METHODS
+
+=head2 new
+
+  my $report = Email::ARF::Report->new($message);
+
+Given either an Email::MIME object or a string containing the text of an email
+message, this method returns a new Email::ARF::Report object.  If the given
+message source is not a valid report in ARF format, an exception is raised.
+
+=head2 create
+
+  my $mail = Email::ARF::Report->create(
+    original_email => $email,
+    description    => $description,
+    fields         => \%fields,      # or \@fields
+    header_str     => \@headers,
+  );
+
+This method creates a new ARF report from scratch.
+
+The C<original_email> parameter may be given as a string, a string reference,
+or as an object that provides an C<as_string> method.
+
+The optional C<header_str> parameter is an arrayref of name/value pairs to be
+added as extra headers in the ARF report.  The values are expected to be
+character strings, and will be MIME-encoded as needed.  To pass pre-encoded
+headers, use the C<header> parameter.  These are handled by L<Email::MIME>'s
+C<create> constructor.
+
+Default values are provided for the following fields:
+
+  version       - 0.1
+  user-agent    - Email::ARF::Report/$VERSION
+  feedback-type - other
 
 =head2 as_email
 
@@ -202,19 +253,9 @@ If you just want to get a string representation of the report, call
 C<L</as_string>>.  If you call C<as_email> and make changes to the Email::MIME
 object, the Email::ARF::Report will I<not> be affected.
 
-=cut
-
-sub as_email {
-  return Email::MIME->new($_[0]->as_string)
-}
-
 =head2 as_string
 
 This method returns a string representation of the report.
-
-=cut
-
-sub as_string { $_[0]->{mime}->as_string }
 
 =head2 original_email
 
@@ -222,26 +263,10 @@ This method returns an Email::Simple object containing the original message to
 which the report refers.  Bear in mind that this message may have been edited
 by the reporter to remove identifying information.
 
-=cut
-
-sub original_email {
-  $_[0]->{original_email}
-}
-
 =head2 description
 
 This method returns the human-readable description of the report, taken from
 the body of the human-readable (first) subpart of the report.
-
-=cut
-
-sub _description_part { $_[0]->{description_part} }
-
-sub description {
-  $_[0]->_description_part->body;
-}
-
-sub _fields { $_[0]->{fields} }
 
 =head2 field
 
@@ -252,16 +277,6 @@ This method returns the value for the given field from the second,
 machine-readable part of the report.  In scalar context, it returns the first
 value for the field.
 
-=cut
-
-sub field {
-  my ($self, $field) = @_;
-
-  return $self->_fields->header($field);
-}
-
-=head2 feedback_type
-
 =head2 user_agent
 
 =head2 arf_version
@@ -270,11 +285,7 @@ These methods are shorthand for retrieving the fields of the same name, except
 for C<arf_version>, which returns the F<Version> header.  It has been renamed
 to avoid confusion with the universal C<VERSION> method.
 
-=cut
-
-sub feedback_type { $_[0]->field('Feedback-Type'); }
-sub user_agent    { $_[0]->field('User-Agent');    }
-sub arf_version   { $_[0]->field('Version');       }
+=head2 feedback_type
 
 =head1 SEE ALSO
 
@@ -288,17 +299,16 @@ This module is maintained by the Perl Email Project
 
 L<http://emailproject.perl.org/wiki/Email::ARF::Report>
 
-=head1 AUTHORS
+=head1 AUTHOR
 
-Ricardo SIGNES E<lt>F<rjbs@cpan.org>E<gt>
+Ricardo Signes <rjbs@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2007 by Ricardo SIGNES
+This software is copyright (c) 2011 by Ricardo Signes.
 
-This library is free software; you can redistribute it and/or modify it under
-the same terms as Perl itself.
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
 
-1;

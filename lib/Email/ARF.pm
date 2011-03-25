@@ -1,24 +1,41 @@
 use strict;
 use warnings;
-
 package Email::ARF;
+BEGIN {
+  $Email::ARF::VERSION = '0.006';
+}
+# ABSTRACT: abuse report format (placeholder module)
+
+
+warn "This module does nothing." unless $ENV{HARNESS_ACTIVE};
+
+1;
+
+__END__
+=pod
 
 =head1 NAME
 
 Email::ARF - abuse report format (placeholder module)
 
+=head1 VERSION
+
+version 0.006
+
 =head1 REFERENCES
 
 You probably wanted to be looking at L<Email::ARF::Report>.
 
-=head1 VERSION
+=head1 AUTHOR
 
-version 0.005
+Ricardo Signes <rjbs@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2011 by Ricardo Signes.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
 
-our $VERSION = '0.005';
-
-warn "This module does nothing." unless $ENV{HARNESS_ACTIVE};
-
-1;
