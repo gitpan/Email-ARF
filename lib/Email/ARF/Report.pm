@@ -1,8 +1,8 @@
 use strict;
 use warnings;
 package Email::ARF::Report;
-BEGIN {
-  $Email::ARF::Report::VERSION = '0.006';
+{
+  $Email::ARF::Report::VERSION = '0.007';
 }
 # ABSTRACT: interpret Abuse Reporting Format (ARF) messages
 
@@ -107,7 +107,7 @@ sub create {
   }
 
   unless (defined $fields->header('version')) {
-    $fields->header_set('Version', "0.1");
+    $fields->header_set('Version', "1");
   }
 
   unless (defined $fields->header('Feedback-Type')) {
@@ -174,6 +174,7 @@ sub arf_version   { $_[0]->field('Version');       }
 1;
 
 __END__
+
 =pod
 
 =head1 NAME
@@ -182,7 +183,7 @@ Email::ARF::Report - interpret Abuse Reporting Format (ARF) messages
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 WARNING
 
@@ -240,7 +241,7 @@ C<create> constructor.
 
 Default values are provided for the following fields:
 
-  version       - 0.1
+  version       - 1
   user-agent    - Email::ARF::Report/$VERSION
   feedback-type - other
 
@@ -305,10 +306,9 @@ Ricardo Signes <rjbs@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Ricardo Signes.
+This software is copyright (c) 2013 by Ricardo Signes.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
