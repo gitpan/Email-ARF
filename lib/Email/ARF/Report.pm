@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Email::ARF::Report;
 {
-  $Email::ARF::Report::VERSION = '0.008';
+  $Email::ARF::Report::VERSION = '0.009';
 }
 # ABSTRACT: interpret Abuse Reporting Format (ARF) messages
 
@@ -49,20 +49,22 @@ sub new {
     original_part    => $original_part,
   } => $class;
 
-  $self->{fields} = $self->_email_from_body($report_part)->header_obj;
+  $self->{fields} = $self->_email_from_body($report_part, 1)->header_obj;
   $self->{original_email} = $self->_email_from_body($original_part);
 
   return $self;
 }
 
 sub _email_from_body {
-  my ($self, $src_email) = @_;
+  my ($self, $src_email, $append_nl) = @_;
 
   my $src_email_body = $src_email->body;
 
   $src_email_body =~ s/\A(\x0d|\x0a)+//g;
 
-  my $email = Email::MIME->new($src_email_body);
+  my $email = Email::MIME->new(
+    $append_nl ? "$src_email_body\n" : $src_email_body
+  );
 }
 
 
@@ -170,6 +172,9 @@ sub feedback_type { $_[0]->field('Feedback-Type'); }
 sub user_agent    { $_[0]->field('User-Agent');    }
 sub arf_version   { $_[0]->field('Version');       }
 
+
+1;
+
 __END__
 
 =pod
@@ -180,7 +185,7 @@ Email::ARF::Report - interpret Abuse Reporting Format (ARF) messages
 
 =head1 VERSION
 
-version 0.008
+version 0.009
 
 =head1 WARNING
 
@@ -290,8 +295,6 @@ to avoid confusion with the universal C<VERSION> method.
 L<http://www.mipassoc.org/arf/>
 
 L<RFC 5965|http://tools.ietf.org/html/rfc5965>
-
-1;
 
 =head1 AUTHOR
 

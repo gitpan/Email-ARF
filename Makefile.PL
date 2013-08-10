@@ -30,12 +30,12 @@ my %WriteMakefileArgs = (
     "warnings" => "0"
   },
   "TEST_REQUIRES" => {
+    "Capture::Tiny" => "0",
     "Email::Simple::Creator" => "0",
-    "File::Find" => "0",
-    "File::Temp" => "0",
-    "Test::More" => "0.96"
+    "Test::More" => "0.96",
+    "blib" => "0"
   },
-  "VERSION" => "0.008",
+  "VERSION" => "0.009",
   "test" => {
     "TESTS" => "t/*.t"
   }

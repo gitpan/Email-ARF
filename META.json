@@ -4,7 +4,7 @@
       "Ricardo Signes <rjbs@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300036, CPAN::Meta::Converter version 2.131560",
+   "generated_by" : "Dist::Zilla version 4.300036, CPAN::Meta::Converter version 2.132140",
    "license" : [
       "perl_5"
    ],
@@ -39,10 +39,10 @@
       },
       "test" : {
          "requires" : {
+            "Capture::Tiny" : "0",
             "Email::Simple::Creator" : "0",
-            "File::Find" : "0",
-            "File::Temp" : "0",
-            "Test::More" : "0.96"
+            "Test::More" : "0.96",
+            "blib" : "0"
          }
       }
    },
@@ -58,7 +58,7 @@
          "web" : "https://github.com/rjbs/Email-ARF"
       }
    },
-   "version" : "0.008",
+   "version" : "0.009",
    "x_Dist_Zilla" : {
       "perl" : {
          "version" : "5.019002"
@@ -181,13 +181,23 @@
          },
          {
             "class" : "Dist::Zilla::Plugin::Test::Compile",
+            "config" : {
+               "Dist::Zilla::Plugin::Test::Compile" : {
+                  "module_finder" : [
+                     ":InstallModules"
+                  ],
+                  "script_finder" : [
+                     ":ExecFiles"
+                  ]
+               }
+            },
             "name" : "@RJBS/Test::Compile",
-            "version" : "2.002"
+            "version" : "2.018"
          },
          {
             "class" : "Dist::Zilla::Plugin::ReportVersions::Tiny",
             "name" : "@RJBS/ReportVersions::Tiny",
-            "version" : "1.08"
+            "version" : "1.09"
          },
          {
             "class" : "Dist::Zilla::Plugin::Prereqs",
