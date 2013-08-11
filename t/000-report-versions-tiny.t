@@ -51,7 +51,7 @@ sub pmver {
 eval { $v .= pmver('Capture::Tiny','any version') };
 eval { $v .= pmver('Carp','any version') };
 eval { $v .= pmver('Email::MIME','1.900') };
-eval { $v .= pmver('Email::MIME::ContentType','any version') };
+eval { $v .= pmver('Email::MIME::ContentType','1.016') };
 eval { $v .= pmver('Email::MIME::Creator','any version') };
 eval { $v .= pmver('Email::Simple::Creator','any version') };
 eval { $v .= pmver('ExtUtils::MakeMaker','6.30') };

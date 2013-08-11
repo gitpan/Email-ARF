@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Email::ARF;
 {
-  $Email::ARF::VERSION = '0.009';
+  $Email::ARF::VERSION = '0.010';
 }
 # ABSTRACT: abuse report format (placeholder module)
 
@@ -21,7 +21,7 @@ Email::ARF - abuse report format (placeholder module)
 
 =head1 VERSION
 
-version 0.009
+version 0.010
 
 =head1 REFERENCES
 

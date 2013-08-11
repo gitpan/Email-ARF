@@ -22,7 +22,7 @@ my %WriteMakefileArgs = (
   "PREREQ_PM" => {
     "Carp" => "0",
     "Email::MIME" => "1.900",
-    "Email::MIME::ContentType" => "0",
+    "Email::MIME::ContentType" => "1.016",
     "Email::MIME::Creator" => "0",
     "Params::Util" => "0",
     "Scalar::Util" => "0",
@@ -35,7 +35,7 @@ my %WriteMakefileArgs = (
     "Test::More" => "0.96",
     "blib" => "0"
   },
-  "VERSION" => "0.009",
+  "VERSION" => "0.010",
   "test" => {
     "TESTS" => "t/*.t"
   }
